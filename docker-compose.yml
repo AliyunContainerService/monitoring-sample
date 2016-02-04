@@ -34,6 +34,8 @@ grafana:
     - INFLUXDB_NAME=cadvisor
     - INFLUXDB_USER=root
     - INFLUXDB_PASS=root
+  labels:
+    aliyun.routing.port_3000: 'http://grafana'
 config:
   image: registry.aliyuncs.com/acs-sample/grafana-config
   links:
