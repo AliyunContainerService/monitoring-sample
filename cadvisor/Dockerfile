@@ -1,2 +1,2 @@
 # Google cAdvisor from https://hub.docker.com/r/google/cadvisor/
-FROM google/cadvisor:0.20.5
+FROM google/cadvisor:v0.20.5
