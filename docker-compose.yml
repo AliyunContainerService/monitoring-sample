@@ -9,7 +9,7 @@ influxsrv:
   environment:
     - PRE_CREATE_DB=cadvisor
 cadvisor:
-  image: registry.aliyuncs.com/acs-sample/google-cadvisor:v0.20.5
+  image: registry.aliyuncs.com/acs-sample/google-cadvisor:v0.20
   command: -storage_driver=influxdb -storage_driver_db=cadvisor -storage_driver_host=influxsrv:8086
   ports:
     - "9090:8080"
@@ -23,7 +23,7 @@ cadvisor:
   labels:
     aliyun.global: "true"
 grafana:
-  image: registry.aliyuncs.com/acs-sample/grafana:2.0.2
+  image: registry.aliyuncs.com/acs-sample/grafana:2.0
   ports:
     - "3000:3000"
   links:
@@ -37,7 +37,7 @@ grafana:
   labels:
     aliyun.routing.port_3000: 'http://grafana'
 config:
-  image: registry.aliyuncs.com/acs-sample/grafana-config
+  image: registry.aliyuncs.com/acs-sample/grafana-config:0.8
   links:
     - influxsrv:influxsrv
     - grafana:grafana
