@@ -52,40 +52,26 @@ function usage {
   exit 1
 }
 
-function influx_has_database {
-  curl --silent "${INFLUXDB_API_URL}db?u=${INFLUXDB_ROOT_LOGIN}&p=${INFLUXDB_ROOT_PASSWORD}" | grep --silent "${INFLUXDB_DB_NAME}"
-}
-
 function influx_create_database {
-  curl --silent --data-binary "{\"name\":\"${INFLUXDB_DB_NAME}\"}" "${INFLUXDB_API_URL}db?u=${INFLUXDB_ROOT_PASSWORD}&p=${INFLUXDB_ROOT_PASSWORD}"
-}
-
-function influx_has_user {
-  curl --silent "${INFLUXDB_API_URL}db/${INFLUXDB_DB_NAME}/users?u=${INFLUXDB_ROOT_LOGIN}&p=${INFLUXDB_ROOT_PASSWORD}" | grep --silent "${INFLUXDB_DB_LOGIN}"
+  curl --silent --data-urlencode "q=CREATE DATABASE ${INFLUXDB_DB_NAME}" "${INFLUXDB_API_URL}query?u=${INFLUXDB_ROOT_PASSWORD}&p=${INFLUXDB_ROOT_PASSWORD}"
 }
 
 function influx_create_user {
-  curl --silent --data-binary "{\"name\":\"${INFLUXDB_DB_NAME}\",\"password\":\"${INFLUXDB_DB_PASSWORD}\"}" "${INFLUXDB_API_URL}db/$INFLUXDB_DB_NAME/users?u=${INFLUXDB_ROOT_PASSWORD}&p=${INFLUXDB_ROOT_PASSWORD}"
+  curl --silent --data-binary "CREATE USER ${INFLUXDB_DB_NAME} WITH PASSWORD ${INFLUXDB_DB_PASSWORD} WITH ALL PRIVILEGES" "${INFLUXDB_API_URL}query?u=${INFLUXDB_ROOT_PASSWORD}&p=${INFLUXDB_ROOT_PASSWORD}"
 }
 
 function setup_influxdb {
-  if influx_has_database; then
-    info "InfluxDB: Database $INFLUXDB_DB_NAME already exists"
+  if influx_create_database; then
+    success "InfluxDB: Database $INFLUXDB_DB_NAME created"
   else
-    if influx_create_database; then
-      success "InfluxDB: Database $INFLUXDB_DB_NAME created"
-    else
-      error "InfluxDB: Database $INFLUXDB_DB_NAME could not be created"
-    fi
+    error "InfluxDB: Database $INFLUXDB_DB_NAME could not be created"
   fi
-  if influx_has_user; then
-    info "InfluxDB: Database ${INFLUXDB_DB_NAME} already has the user ${INFLUXDB_DB_LOGIN}"
+
+
+  if influx_create_user; then
+    success "InfluxDB: Database ${INFLUXDB_DB_NAME} user ${INFLUXDB_DB_LOGIN} created"
   else
-    if influx_create_user; then
-      success "InfluxDB: Database ${INFLUXDB_DB_NAME} user ${INFLUXDB_DB_LOGIN} created"
-    else
-      error "InfluxDB: Database ${INFLUXDB_DB_NAME} user ${INFLUXDB_DB_LOGIN} could not be created"
-    fi
+    error "InfluxDB: Database ${INFLUXDB_DB_NAME} user ${INFLUXDB_DB_LOGIN} could not be created"
   fi
 }
 
@@ -107,11 +93,13 @@ function grafana_has_data_source {
 
 function grafana_create_data_source {
   setup_grafana_session
+  echo "{\"name\":\"${GRAFANA_DATA_SOURCE_NAME}\",\"type\":\"influxdb\",\"url\":\"${INFLUXDB_API_REMOTE_URL}\",\"access\":\"proxy\",\"jsonData\":{},\"database\":\"$INFLUXDB_DB_NAME\",\"user\":\"${INFLUXDB_DB_LOGIN}\",\"password\":\"${INFLUXDB_DB_PASSWORD}\"}"
+
   curl --cookie "${COOKIEJAR}" \
-       -X PUT \
+       -X POST \
        --silent \
        -H 'Content-Type: application/json;charset=UTF-8' \
-       --data-binary "{\"name\":\"${GRAFANA_DATA_SOURCE_NAME}\",\"type\":\"influxdb_08\",\"url\":\"${INFLUXDB_API_REMOTE_URL}\",\"access\":\"proxy\",\"database\":\"$INFLUXDB_DB_NAME\",\"user\":\"${INFLUXDB_DB_LOGIN}\",\"password\":\"${INFLUXDB_DB_PASSWORD}\"}" \
+       --data-binary "{\"name\":\"${GRAFANA_DATA_SOURCE_NAME}\",\"type\":\"influxdb\",\"url\":\"${INFLUXDB_API_REMOTE_URL}\",\"access\":\"proxy\",\"jsonData\":{},\"database\":\"$INFLUXDB_DB_NAME\",\"user\":\"${INFLUXDB_DB_LOGIN}\",\"password\":\"${INFLUXDB_DB_PASSWORD}\"}" \
        "${GRAFANA_API_URL}datasources" 2>&1 | grep 'Datasource added' --silent;
 }
 
