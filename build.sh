@@ -1,6 +1,7 @@
 #!/bin/bash
 
-docker build --pull -t registry.aliyuncs.com/acs-sample/google-cadvisor:v0.20 cadvisor/v0.20
+docker build --pull -t registry.aliyuncs.com/acs-sample/google-cadvisor:v0.20.1 cadvisor/v0.20.1
+docker build --pull -t registry.aliyuncs.com/acs-sample/google-cadvisor:v0.20.5 cadvisor/v0.20.5
 docker build --pull -t registry.aliyuncs.com/acs-sample/google-cadvisor:v0.22 cadvisor/v0.22
 docker build --pull -t registry.aliyuncs.com/acs-sample/google-cadvisor:v0.23 cadvisor/v0.23
 
