@@ -71,7 +71,7 @@ influxsrv:
   environment:
     - PRE_CREATE_DB=cadvisor
 cadvisor:
-  image: registry.aliyuncs.com/acs-sample/google-cadvisor:v0.23
+  image: registry.aliyuncs.com/acs-sample/google-cadvisor:v0.24.1
   command: -storage_driver=influxdb -storage_driver_db=cadvisor -storage_driver_host=influxsrv:8086
   ports:
     - "9090:8080"
@@ -113,3 +113,4 @@ docker-compose up -d
 
 -------------------
 * Li Yi (denverdino@gmail.com)
+
